@@ -1,46 +1,82 @@
 import { LinearGradient } from "expo-linear-gradient";
-import React from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   TextInput,
   View,
   Text,
   TouchableOpacity,
+  Alert,
 } from "react-native";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { login } from "@/src/services/auth";
 
 const index = () => {
+  const router = useRouter();
+  const [name, setName] = useState("");
+  const [senha, setSenha] = useState("");
+  async function handleLogin() {
+    try {
+      await login(name, senha);
+      Alert.alert("Cadastro realizado com sucesso!");
+      router.push("/Home");
+    } catch (error) {
+      Alert.alert("Erro ao cadastrar. Tente novamente.");
+      setName("");
+      setSenha("");
+    }
+  }
   return (
-    <LinearGradient
-      colors={["#d9e9ff", "#ffffff"]}
-      style={{ flex: 1 }}
-    >
+    <LinearGradient colors={["#d9e9ff", "#ffffff"]} style={{ flex: 1 }}>
       <View style={styles.container}>
         <FontAwesome5 name="wallet" size={80} color="#1E90FF" />
 
         <Text style={styles.title}>Login</Text>
 
         <View style={styles.inputContainer}>
-          <Ionicons name="mail-outline" size={22} color="#666" style={styles.icon} />
-          <TextInput style={styles.inputText} placeholder="Email" />
+          <Ionicons
+            name="mail-outline"
+            size={22}
+            color="#666"
+            style={styles.icon}
+          />
+          <TextInput
+            style={styles.inputText}
+            placeholder="Email"
+            onChangeText={setName}
+          />
         </View>
 
         <View style={styles.inputContainer}>
-          <Ionicons name="lock-closed-outline" size={22} color="#666" style={styles.icon} />
-          <TextInput style={styles.inputText} placeholder="Senha" secureTextEntry />
+          <Ionicons
+            name="lock-closed-outline"
+            size={22}
+            color="#666"
+            style={styles.icon}
+          />
+          <TextInput
+            style={styles.inputText}
+            placeholder="Senha"
+            secureTextEntry
+            onChangeText={setSenha}
+          />
         </View>
 
-        <Link href="/" style={styles.link}>Esqueceu sua senha?</Link>
+        <Link href="/" style={styles.link}>
+          Esqueceu sua senha?
+        </Link>
 
-        <TouchableOpacity style={styles.loginButton}>
+        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
 
         <View style={styles.registerContainer}>
           <Text>Não tem cadastro?</Text>
-          <Link href="/Cadastro" style={styles.inlineLink}>Cadastre-se</Link>
+          <Link href="/Cadastro" style={styles.inlineLink}>
+            Cadastre-se
+          </Link>
         </View>
       </View>
     </LinearGradient>
