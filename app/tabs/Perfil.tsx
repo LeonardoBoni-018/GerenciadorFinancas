@@ -1,15 +1,31 @@
+"use client"
+
 import { LinearGradient } from "expo-linear-gradient"
 import { Image } from "expo-image"
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native"
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal, TextInput } from "react-native"
 import Ionicons from "@expo/vector-icons/Ionicons"
+import React from "react"
 
 export default function Perfil() {
-  const userData = {
+  const [openModal, setOpenModal] = React.useState(false)
+  const [userData, setUserData] = React.useState({
     name: "Leonardo Silva",
     email: "leonardo@email.com",
     phone: "(11) 9 8765-4321",
     city: "São Paulo, SP",
     joinDate: "Membro desde Janeiro 2024",
+  })
+
+  const [editData, setEditData] = React.useState({ ...userData })
+
+  const handleSave = () => {
+    setUserData(editData)
+    setOpenModal(false)
+  }
+
+  const handleCancel = () => {
+    setEditData({ ...userData })
+    setOpenModal(false)
   }
 
   const stats = [
@@ -27,10 +43,98 @@ export default function Perfil() {
             <Ionicons name="chevron-back-outline" size={24} color="#1E90FF" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Meu Perfil</Text>
-          <TouchableOpacity style={styles.editButton}>
+          <TouchableOpacity style={styles.editButton} onPress={() => setOpenModal(true)}>
             <Ionicons name="pencil-outline" size={24} color="#1E90FF" />
           </TouchableOpacity>
         </View>
+
+        <Modal visible={openModal} animationType="slide" transparent={true} onRequestClose={handleCancel}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Editar Perfil</Text>
+                <TouchableOpacity onPress={handleCancel} style={styles.closeButton}>
+                  <Ionicons name="close-outline" size={28} color="#666" />
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
+                {/* Name Input */}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Nome</Text>
+                  <View style={styles.inputContainer}>
+                    <Ionicons name="person-outline" size={20} color="#1E90FF" style={styles.inputIcon} />
+                    <TextInput
+                      style={styles.input}
+                      value={editData.name}
+                      onChangeText={(text) => setEditData({ ...editData, name: text })}
+                      placeholder="Digite seu nome"
+                      placeholderTextColor="#999"
+                    />
+                  </View>
+                </View>
+
+                {/* Email Input */}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Email</Text>
+                  <View style={styles.inputContainer}>
+                    <Ionicons name="mail-outline" size={20} color="#1E90FF" style={styles.inputIcon} />
+                    <TextInput
+                      style={styles.input}
+                      value={editData.email}
+                      onChangeText={(text) => setEditData({ ...editData, email: text })}
+                      placeholder="Digite seu email"
+                      placeholderTextColor="#999"
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                    />
+                  </View>
+                </View>
+
+                {/* Phone Input */}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Telefone</Text>
+                  <View style={styles.inputContainer}>
+                    <Ionicons name="call-outline" size={20} color="#1E90FF" style={styles.inputIcon} />
+                    <TextInput
+                      style={styles.input}
+                      value={editData.phone}
+                      onChangeText={(text) => setEditData({ ...editData, phone: text })}
+                      placeholder="Digite seu telefone"
+                      placeholderTextColor="#999"
+                      keyboardType="phone-pad"
+                    />
+                  </View>
+                </View>
+
+                {/* City Input */}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Localização</Text>
+                  <View style={styles.inputContainer}>
+                    <Ionicons name="location-outline" size={20} color="#1E90FF" style={styles.inputIcon} />
+                    <TextInput
+                      style={styles.input}
+                      value={editData.city}
+                      onChangeText={(text) => setEditData({ ...editData, city: text })}
+                      placeholder="Digite sua cidade"
+                      placeholderTextColor="#999"
+                    />
+                  </View>
+                </View>
+              </ScrollView>
+
+              {/* Action Buttons */}
+              <View style={styles.modalActions}>
+                <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
+                  <Text style={styles.cancelButtonText}>Cancelar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+                  <Text style={styles.saveButtonText}>Salvar</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
 
         {/* Profile Card */}
         <View style={styles.profileCard}>
@@ -259,6 +363,92 @@ const styles = StyleSheet.create({
   actionButtonText: {
     color: "#1E90FF",
     fontSize: 14,
+    fontWeight: "600",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "#FFF",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 20,
+    paddingBottom: 40,
+    paddingHorizontal: 20,
+    maxHeight: "90%",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#111",
+  },
+  closeButton: {
+    padding: 4,
+  },
+  modalScroll: {
+    marginBottom: 20,
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 8,
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F8F9FA",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E3F2FD",
+    paddingHorizontal: 16,
+  },
+  inputIcon: {
+    marginRight: 12,
+  },
+  input: {
+    flex: 1,
+    paddingVertical: 14,
+    fontSize: 15,
+    color: "#333",
+  },
+  modalActions: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: "#F0F0F0",
+    alignItems: "center",
+  },
+  cancelButtonText: {
+    color: "#666",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  saveButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: "#1E90FF",
+    alignItems: "center",
+  },
+  saveButtonText: {
+    color: "#FFF",
+    fontSize: 16,
     fontWeight: "600",
   },
 })
