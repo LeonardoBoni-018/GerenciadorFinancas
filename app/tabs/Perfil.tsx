@@ -5,15 +5,18 @@ import { Image } from "expo-image"
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal, TextInput } from "react-native"
 import Ionicons from "@expo/vector-icons/Ionicons"
 import React from "react"
+import { getUser } from "@/src/services/user"
 
 export default function Perfil() {
+  const user = getUser();
   const [openModal, setOpenModal] = React.useState(false)
+  const formatedJoinDate = new Date(user.criadoEm).toLocaleDateString('pt-BR', { year: 'numeric', month: 'long' });
   const [userData, setUserData] = React.useState({
-    name: "Leonardo Silva",
-    email: "leonardo@email.com",
-    phone: "(11) 9 8765-4321",
-    city: "São Paulo, SP",
-    joinDate: "Membro desde Janeiro 2024",
+    name: user.nome,
+    email: user.email,
+    phone: user.telefone,
+    city: user.cidade,
+    joinDate: `Membro desde ${formatedJoinDate}`,
   })
 
   const [editData, setEditData] = React.useState({ ...userData })

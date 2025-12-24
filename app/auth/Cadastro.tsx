@@ -17,15 +17,21 @@ export default function Cadastrar() {
   const router = useRouter();
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [cidade, setCidade] = useState("");
   const [senha, setSenha] = useState("");
 
   async function handleCadastro() {
     try {
-      await cadastrar(nome, email, senha);
+      await cadastrar(nome, email, telefone, cidade, senha);
       Alert.alert("Cadastro realizado!");
       router.replace("/tabs/Home");
     } catch (error) {
-      Alert.alert("Erro ao cadastrar.");
+      // Melhor exibir a mensagem do servidor (se houver) para facilitar o debug
+      console.error("Erro ao cadastrar:", error);
+      const err = error as any;
+      const msg = err?.response?.data?.message || err?.message || "Erro ao cadastrar.";
+      Alert.alert("Erro ao cadastrar", String(msg));
     }
   }
 
@@ -50,6 +56,24 @@ export default function Cadastrar() {
             style={styles.inputText}
             placeholder="Email"
             onChangeText={setEmail}
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <Ionicons name="phone-portrait-sharp" size={22} color="#666" />
+          <TextInput
+            style={styles.inputText}
+            placeholder="Telefone"
+            onChangeText={setTelefone}
+          />
+        </View>
+
+         <View style={styles.inputContainer}>
+          <Ionicons name="location-outline" size={22} color="#666" />
+          <TextInput
+            style={styles.inputText}
+            placeholder="Cidade"
+            onChangeText={setCidade}
           />
         </View>
 

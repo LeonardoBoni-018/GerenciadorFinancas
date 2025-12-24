@@ -12,6 +12,7 @@ import { Link, useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { login } from "@/src/services/auth";
+import { setUser } from "@/src/services/user";
 
 export default function Index() {
   const router = useRouter();
@@ -20,11 +21,18 @@ export default function Index() {
 
   async function handleLogin() {
     try {
-      await login(email, senha);
-      Alert.alert("Login realizado!");
+      const response = await login(email, senha);
+      const user = response?.data?.user;
+      if (user) {
+        setUser(user);
+      }
+      Alert.alert("Login realizado!", `Bem-vindo ${user?.nome || user?.name || ""}`);
       router.replace("/tabs/Home");
     } catch (error) {
-      Alert.alert("Erro ao logar.");
+      console.error(error);
+      const err = error as any;
+      const msg = err?.response?.data?.message || err?.message || "Erro ao logar.";
+      Alert.alert("Erro ao logar", String(msg));
     }
   }
 
