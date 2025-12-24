@@ -1,16 +1,23 @@
 import { LinearGradient } from "expo-linear-gradient"
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native"
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch } from "react-native"
 import Ionicons from "@expo/vector-icons/Ionicons"
+import React from "react"
 
 export default function Config() {
+  const [darkMode, setDarkMode] = React.useState(false)
+
   const configItems = [
     { icon: "lock-closed-outline", label: "Segurança", value: "Ativo" },
     { icon: "notifications-outline", label: "Notificações", value: "Ativo" },
-    { icon: "moon-outline", label: "Modo Escuro", value: "Desligado" },
+    { icon: "moon-outline", label: "Modo Escuro", value: darkMode ? "Ativo" : "Desligado" },
     { icon: "document-text-outline", label: "Privacidade", value: "" },
     { icon: "help-circle-outline", label: "Ajuda", value: "" },
     { icon: "information-circle-outline", label: "Sobre", value: "" },
   ]
+
+  function toggleDarkMode(value: boolean) {
+    setDarkMode(value)
+  }
 
   return (
     <LinearGradient colors={["#f0f7ff", "#ffffff"]} style={styles.container}>
@@ -20,7 +27,7 @@ export default function Config() {
         </View>
 
         {configItems.map((item, index) => (
-          <TouchableOpacity key={index} style={styles.configItem}>
+          <TouchableOpacity key={index} style={styles.configItem} activeOpacity={0.8}>
             <View style={styles.configLeft}>
               <View style={styles.iconBox}>
                 <Ionicons name={item.icon as any} size={24} color="#1E90FF" />
@@ -28,8 +35,14 @@ export default function Config() {
               <Text style={styles.configLabel}>{item.label}</Text>
             </View>
             <View style={styles.configRight}>
-              {item.value && <Text style={styles.configValue}>{item.value}</Text>}
-              <Ionicons name="chevron-forward-outline" size={20} color="#CCC" />
+              {item.label === "Modo Escuro" ? (
+                <Switch value={darkMode} onValueChange={toggleDarkMode} thumbColor={darkMode ? "#FFF" : "#FFF"} trackColor={{ false: "#CFCFCF", true: "#1E90FF" }} />
+              ) : (
+                <>
+                  {item.value !== "" && <Text style={styles.configValue}>{item.value}</Text>}
+                  <Ionicons name="chevron-forward-outline" size={20} color="#CCC" />
+                </>
+              )}
             </View>
           </TouchableOpacity>
         ))}
