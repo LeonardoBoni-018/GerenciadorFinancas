@@ -1,41 +1,91 @@
-"use client"
+"use client";
 
-import { LinearGradient } from "expo-linear-gradient"
-import { Image } from "expo-image"
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal, TextInput } from "react-native"
-import Ionicons from "@expo/vector-icons/Ionicons"
-import React from "react"
-import { getUser } from "@/src/services/user"
+import { LinearGradient } from "expo-linear-gradient";
+import { Image } from "expo-image";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Modal,
+  TextInput,
+  Alert,
+} from "react-native";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import React from "react";
+import { getUser, setUser } from "@/src/services/user";
+import { updateProfile } from "@/src/services/auth";
 
 export default function Perfil() {
   const user = getUser();
-  const [openModal, setOpenModal] = React.useState(false)
-  const formatedJoinDate = new Date(user.criadoEm).toLocaleDateString('pt-BR', { year: 'numeric', month: 'long' });
+  const [openModal, setOpenModal] = React.useState(false);
+  const formatedJoinDate = new Date(user.criadoEm).toLocaleDateString("pt-BR", {
+    year: "numeric",
+    month: "long",
+  });
   const [userData, setUserData] = React.useState({
+    id: user.id,
     name: user.nome,
     email: user.email,
     phone: user.telefone,
     city: user.cidade,
     joinDate: `Membro desde ${formatedJoinDate}`,
-  })
+  });
 
-  const [editData, setEditData] = React.useState({ ...userData })
+  const [editData, setEditData] = React.useState({ ...userData });
+  console.log('user:', user);
 
-  const handleSave = () => {
-    setUserData(editData)
-    setOpenModal(false)
-  }
+  const handleSave = async () => {
+    // validate presence of id
+    if (!user || !user.id) {
+      Alert.alert("Erro", "Usuário não encontrado. Faça login novamente.");
+      return;
+    }
+
+    try {
+      const res = await updateProfile(
+        user.id,
+        editData.name,
+        editData.email,
+        editData.phone,
+        editData.city
+      );
+
+      const updatedUser = res?.data?.user;
+      if (updatedUser) {
+        // update global user store and local state
+        setUser(updatedUser);
+        setUserData({
+          id: updatedUser.id,
+          name: updatedUser.nome,
+          email: updatedUser.email,
+          phone: updatedUser.telefone,
+          city: updatedUser.cidade,
+          joinDate: `Membro desde ${new Date(updatedUser.criadoEm).toLocaleDateString("pt-BR", { year: "numeric", month: "long" })}`,
+        });
+      }
+
+      setOpenModal(false);
+      Alert.alert("Sucesso", "Perfil atualizado com sucesso.");
+    } catch (err) {
+      console.error("Erro ao atualizar perfil:", err);
+      const e = err as any;
+      const msg = e?.response?.data?.message || e?.message || "Erro ao atualizar perfil";
+      Alert.alert("Erro", String(msg));
+    }
+  };
 
   const handleCancel = () => {
-    setEditData({ ...userData })
-    setOpenModal(false)
-  }
+    setEditData({ ...userData });
+    setOpenModal(false);
+  };
 
   const stats = [
     { label: "Transações", value: "124" },
     { label: "Economizado", value: "R$ 2.350" },
     { label: "Meta Mensal", value: "R$ 3.000" },
-  ]
+  ];
 
   return (
     <LinearGradient colors={["#f0f7ff", "#ffffff"]} style={styles.container}>
@@ -46,31 +96,52 @@ export default function Perfil() {
             <Ionicons name="chevron-back-outline" size={24} color="#1E90FF" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Meu Perfil</Text>
-          <TouchableOpacity style={styles.editButton} onPress={() => setOpenModal(true)}>
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() => setOpenModal(true)}
+          >
             <Ionicons name="pencil-outline" size={24} color="#1E90FF" />
           </TouchableOpacity>
         </View>
 
-        <Modal visible={openModal} animationType="slide" transparent={true} onRequestClose={handleCancel}>
+        <Modal
+          visible={openModal}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={handleCancel}
+        >
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>Editar Perfil</Text>
-                <TouchableOpacity onPress={handleCancel} style={styles.closeButton}>
+                <TouchableOpacity
+                  onPress={handleCancel}
+                  style={styles.closeButton}
+                >
                   <Ionicons name="close-outline" size={28} color="#666" />
                 </TouchableOpacity>
               </View>
 
-              <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
+              <ScrollView
+                style={styles.modalScroll}
+                showsVerticalScrollIndicator={false}
+              >
                 {/* Name Input */}
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Nome</Text>
                   <View style={styles.inputContainer}>
-                    <Ionicons name="person-outline" size={20} color="#1E90FF" style={styles.inputIcon} />
+                    <Ionicons
+                      name="person-outline"
+                      size={20}
+                      color="#1E90FF"
+                      style={styles.inputIcon}
+                    />
                     <TextInput
                       style={styles.input}
                       value={editData.name}
-                      onChangeText={(text) => setEditData({ ...editData, name: text })}
+                      onChangeText={(text) =>
+                        setEditData({ ...editData, name: text })
+                      }
                       placeholder="Digite seu nome"
                       placeholderTextColor="#999"
                     />
@@ -81,11 +152,18 @@ export default function Perfil() {
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Email</Text>
                   <View style={styles.inputContainer}>
-                    <Ionicons name="mail-outline" size={20} color="#1E90FF" style={styles.inputIcon} />
+                    <Ionicons
+                      name="mail-outline"
+                      size={20}
+                      color="#1E90FF"
+                      style={styles.inputIcon}
+                    />
                     <TextInput
                       style={styles.input}
                       value={editData.email}
-                      onChangeText={(text) => setEditData({ ...editData, email: text })}
+                      onChangeText={(text) =>
+                        setEditData({ ...editData, email: text })
+                      }
                       placeholder="Digite seu email"
                       placeholderTextColor="#999"
                       keyboardType="email-address"
@@ -98,11 +176,18 @@ export default function Perfil() {
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Telefone</Text>
                   <View style={styles.inputContainer}>
-                    <Ionicons name="call-outline" size={20} color="#1E90FF" style={styles.inputIcon} />
+                    <Ionicons
+                      name="call-outline"
+                      size={20}
+                      color="#1E90FF"
+                      style={styles.inputIcon}
+                    />
                     <TextInput
                       style={styles.input}
                       value={editData.phone}
-                      onChangeText={(text) => setEditData({ ...editData, phone: text })}
+                      onChangeText={(text) =>
+                        setEditData({ ...editData, phone: text })
+                      }
                       placeholder="Digite seu telefone"
                       placeholderTextColor="#999"
                       keyboardType="phone-pad"
@@ -114,11 +199,18 @@ export default function Perfil() {
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Localização</Text>
                   <View style={styles.inputContainer}>
-                    <Ionicons name="location-outline" size={20} color="#1E90FF" style={styles.inputIcon} />
+                    <Ionicons
+                      name="location-outline"
+                      size={20}
+                      color="#1E90FF"
+                      style={styles.inputIcon}
+                    />
                     <TextInput
                       style={styles.input}
                       value={editData.city}
-                      onChangeText={(text) => setEditData({ ...editData, city: text })}
+                      onChangeText={(text) =>
+                        setEditData({ ...editData, city: text })
+                      }
                       placeholder="Digite sua cidade"
                       placeholderTextColor="#999"
                     />
@@ -128,10 +220,16 @@ export default function Perfil() {
 
               {/* Action Buttons */}
               <View style={styles.modalActions}>
-                <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={handleCancel}
+                >
                   <Text style={styles.cancelButtonText}>Cancelar</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+                <TouchableOpacity
+                  style={styles.saveButton}
+                  onPress={handleSave}
+                >
                   <Text style={styles.saveButtonText}>Salvar</Text>
                 </TouchableOpacity>
               </View>
@@ -142,7 +240,10 @@ export default function Perfil() {
         {/* Profile Card */}
         <View style={styles.profileCard}>
           <View style={styles.profileImageContainer}>
-            <Image source={require("../../assets/images/icon.png")} style={styles.profileImage} />
+            <Image
+              source={require("../../assets/images/icon.png")}
+              style={styles.profileImage}
+            />
             <TouchableOpacity style={styles.cameraButton}>
               <Ionicons name="camera-outline" size={16} color="#FFF" />
             </TouchableOpacity>
@@ -205,7 +306,7 @@ export default function Perfil() {
         </View>
       </ScrollView>
     </LinearGradient>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -454,4 +555,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-})
+});
