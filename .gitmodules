@@ -1,0 +1,3 @@
+[submodule "GerenciadorFinancasBackend"]
+	path = GerenciadorFinancasBackend
+	url = https://github.com/LeonardoBoni-018/GerenciadorFinancasBackend.git
